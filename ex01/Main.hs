@@ -1,4 +1,4 @@
-module Ex01 where
+module Main where
 
 import Data.Foldable (find)
 import Data.List (tails, sort)
@@ -18,8 +18,8 @@ answer1 lst = product <$> find condition (pairs lst)
 answer2 :: [Int] -> Maybe Int
 answer2 lst = product <$> find condition (triples lst)
 
-ex01 :: IO ()
-ex01 = do
+main :: IO ()
+main = do
   input <- readFile "input.txt"
   let lst = read <$> lines input
   let srtd = sort lst -- sorting improves speed
