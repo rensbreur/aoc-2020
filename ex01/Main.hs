@@ -25,3 +25,4 @@ main = do
   let srtd = sort lst -- sorting improves speed
   putStrLn $ "Answer 1: " ++ show (answer1 srtd)
   putStrLn $ "Answer 2: " ++ show (answer2 srtd)
+

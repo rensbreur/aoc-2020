@@ -42,3 +42,4 @@ main = parseFromFile pwList "input.txt" >>= \case
     putStrLn $ "Answer 2: " ++ show (length valids2)
   Left err -> do
     putStrLn $ "Could not parse input: " ++ show err
+
