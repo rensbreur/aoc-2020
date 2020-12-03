@@ -10,10 +10,10 @@ readSpace '.' = Space
 readSpace '#' = Tree
 
 readWorld :: String -> World
-readWorld =  (map readSpace <$>) . lines
+readWorld =  (cycle . map readSpace <$>) . lines
 
 slope :: World -> Int -> Journey 
-slope wrld dx = zipWith (\l xs -> cycle xs !! posInLine l) [0..] wrld
+slope wrld dx = zipWith (\l -> (!! posInLine l)) [0..] wrld
   where posInLine l = l * dx
 
 skipEveryOther :: [a] -> [a]
