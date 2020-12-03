@@ -13,7 +13,7 @@ readWorld :: String -> World
 readWorld =  (cycle . map readSpace <$>) . lines
 
 slope :: World -> Int -> Journey 
-slope wrld dx = zipWith (\l -> (!! posInLine l)) [0..] wrld
+slope wrld dx = zipWith (\l xs -> xs !! posInLine l) [0..] wrld
   where posInLine l = l * dx
 
 skipEveryOther :: [a] -> [a]
@@ -24,7 +24,7 @@ countTrees = length . filter (== Tree)
 
 main :: IO ()
 main = do
-  wrld <- readWorld <$> readFile "ex03/input.txt"
+  wrld <- readWorld <$> readFile "input.txt"
   let journey1 = slope wrld 3
   putStrLn $ "Answer 1: " ++ show (countTrees journey1)
   let journeys2 = map (slope wrld) [1,3,5,7] ++ [slope (skipEveryOther wrld) 1]
