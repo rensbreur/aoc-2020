@@ -18,3 +18,4 @@ main = do
   let passes = seatId <$> lines input
   putStrLn $ "Answer 1: " ++ show (maximum passes)
   putStrLn $ "Answer 2: " ++ show (findEmpty passes)
+

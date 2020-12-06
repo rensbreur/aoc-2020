@@ -34,7 +34,7 @@ valid2 (Policy a b chr) pw = length pw >= b
 -- Main
 
 main :: IO ()
-main = parseFromFile pwList "input.txt" >>= \case
+main = parseFromFile pwList "ex02/input.txt" >>= \case
   Right pws -> do
     let valids1 = filter (uncurry valid1) pws
     putStrLn $ "Answer 1: " ++ show (length valids1)

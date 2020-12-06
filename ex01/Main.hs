@@ -20,7 +20,7 @@ answer2 lst = product <$> find condition (triples lst)
 
 main :: IO ()
 main = do
-  input <- readFile "input.txt"
+  input <- readFile "ex01/input.txt"
   let lst = read <$> lines input
   let srtd = sort lst -- sorting improves speed
   putStrLn $ "Answer 1: " ++ show (answer1 srtd)

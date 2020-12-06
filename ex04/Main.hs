@@ -12,9 +12,9 @@ type Passport = Map String String
 -- Parsing 
 
 passport :: Parsec String () Passport
-passport = Map.fromList <$> many1 (parseAssoc <* oneOf keySeparators)
-  where parseAssoc = (,) <$> count 3 lower <*> (char ':' >> many1 (noneOf keySeparators))
-        keySeparators = [' ', '\n']
+passport = Map.fromList <$> assoc `endBy` oneOf separators
+  where assoc = (,) <$> many1 lower <* char ':' <*> many1 (noneOf separators)
+        separators = [' ', '\n']
 
 number :: Parsec String () Int
 number = read <$> many1 digit

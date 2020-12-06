@@ -24,7 +24,7 @@ countTrees = length . filter (== Tree)
 
 main :: IO ()
 main = do
-  wrld <- readWorld <$> readFile "input.txt"
+  wrld <- readWorld <$> readFile "ex03/input.txt"
   let journey1 = slope wrld 3
   putStrLn $ "Answer 1: " ++ show (countTrees journey1)
   let journeys2 = map (slope wrld) [1,3,5,7] ++ [slope (skipEveryOther wrld) 1]
