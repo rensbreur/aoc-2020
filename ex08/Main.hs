@@ -22,7 +22,7 @@ data HandheldState = HandheldState { ip :: Int, acc :: Int }
 initialState :: HandheldState
 initialState = HandheldState 0 0
 
-data ExecState = LoopExc | Finished | IndexExc
+data ExecState = LoopExc | Finished
 
 finished :: ExecState -> Bool
 finished Finished = True
@@ -52,8 +52,6 @@ continue code hso = go hso [] where
       then (hs, LoopExc)
     else if ip >= Main.length code
       then (hs, Finished)
-    else if ip < 0
-      then (hs, IndexExc)
     else go hs (ip : instrs)
 
 run :: Bootcode -> (HandheldState, ExecState)
