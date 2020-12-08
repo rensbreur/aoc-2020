@@ -8,55 +8,47 @@ import qualified Data.Vector as V
 import Text.Parsec
 import Text.Parsec.String ( parseFromFile )
 
-data Instruction = Nop Int | Jmp Int | Acc Int
-  deriving (Show)
+data Instruction = Instruction Opcode Int
+data Opcode = Nop | Jmp | Acc
 
-data Bootcode = Bootcode { (!) :: Int -> Instruction, length :: Int }
+-- allows for lazy patching
+data Bootcode = Bootcode { length :: Int, (!) :: Int -> Instruction }
 
 fromVector :: V.Vector Instruction -> Bootcode
-fromVector v = Bootcode (v V.!) (V.length v)
-
-patch :: Bootcode -> Int -> Instruction -> Bootcode
-patch code i p = Bootcode f (Main.length code) where
-  f j | i == j    = p
-      | otherwise = code Main.! j
-
-swap :: Instruction -> Maybe Instruction
-swap (Jmp n) = Just (Nop n)
-swap (Nop n) = Just (Jmp n)
-swap _       = Nothing
+fromVector v = Bootcode (V.length v) (v V.!)
 
 data HandheldState = HandheldState { ip :: Int, acc :: Int }
-  deriving Show
+
+initialState :: HandheldState
+initialState = HandheldState 0 0
 
 data ExecState = LoopExc | Finished | IndexExc
-  deriving Show
 
 finished :: ExecState -> Bool
 finished Finished = True
 finished _        = False
 
+-- Parsing 
+
 bootcode :: Parsec String () Bootcode
 bootcode = fromVector . V.fromList <$> instr `endBy` newline where
-  instr   =   Nop <$> opc "nop"
-          <|> Jmp <$> opc "jmp"
-          <|> Acc <$> opc "acc"
-  opc str =   try $ string str >> char ' ' >> number
+  instr = Instruction <$> opcode <* space <*> number
+  opcode = (Nop <$ string "nop") <|> (Jmp <$ string "jmp") <|> (Acc <$ string "acc")
+  number = (id <$ char '+' <|> negate <$ char '-') <*> (read <$> many1 digit)
 
-number :: (Read a, Num a) => Parsec String () a
-number = (id <$ char '+' <|> negate <$ char '-') <*> (read <$> many1 digit)
+-- Interpreting bootcode
 
 step :: Bootcode -> HandheldState -> HandheldState
 step code hs@HandheldState{ ip = ip, acc = acc } = case code Main.! ip of
-  Nop _      -> hs{ ip = ip + 1 }
-  Jmp offset -> hs{ ip = ip + offset }
-  Acc add    -> hs{ ip = ip + 1, acc = acc + add }
+  Instruction Nop _      -> hs{ ip = ip + 1 }
+  Instruction Jmp offset -> hs{ ip = ip + offset }
+  Instruction Acc add    -> hs{ ip = ip + 1, acc = acc + add }
 
 continue :: Bootcode -> HandheldState -> (HandheldState, ExecState)
 continue code hso = go hso [] where
   go hso instrs =
     let hs@HandheldState{ ip = ip } = step code hso in
-    if ip `Prelude.elem` instrs
+    if ip `elem` instrs
       then (hs, LoopExc)
     else if ip >= Main.length code
       then (hs, Finished)
@@ -64,13 +56,34 @@ continue code hso = go hso [] where
       then (hs, IndexExc)
     else go hs (ip : instrs)
 
-possiblePrograms :: Bootcode -> [Bootcode]
-possiblePrograms code = Data.Maybe.mapMaybe (\n -> patch code n <$> swap (code Main.! n) ) [0..(Main.length code)]
+run :: Bootcode -> (HandheldState, ExecState)
+run = (`continue` initialState)
+
+accValue :: (HandheldState, ExecState) -> Int
+accValue (state, _) = acc state
+
+-- Program patching 
+
+patch :: Bootcode -> Int -> Instruction -> Bootcode
+patch code i p = Bootcode (Main.length code) $ \j -> if i == j then p else code ! j
+
+patched :: Bootcode -> [Bootcode]
+patched code = mapMaybe (\n -> patch code n <$> swap (code ! n) ) [0..(Main.length code)]
+ where
+   swap (Instruction opc d) = flip Instruction d <$> case opc of
+    Jmp -> Just Nop
+    Nop -> Just Jmp
+    _   -> Nothing
+
+repair :: Bootcode -> Maybe (HandheldState, ExecState) 
+repair result = find (finished . snd) $ map run (patched result)
+
+-- Main
 
 main :: IO ()
 main = parseFromFile bootcode "ex08/input.txt" >>= \case
   Right result -> do
-    print $ continue result (HandheldState 0 0)
-    print $ fmap fst $ find (finished . snd) $ map (`continue` HandheldState 0 0) (possiblePrograms result)
+    print $ "Answer 1: " ++ (show . accValue . run $ result)
+    print $ "Answer 2: " ++ (show . fmap accValue . repair $ result)
   Left err -> print err
 
