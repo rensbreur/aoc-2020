@@ -53,3 +53,21 @@ executable ex08
   hs-source-dirs:      ex08
   default-language:    Haskell2010
 
+executable ex09
+  main-is:             Main.hs
+  build-depends:       base >=4.13 && <4.14, containers, parsec, mtl, vector
+  hs-source-dirs:      ex09
+  default-language:    Haskell2010
+
+executable ex10
+  main-is:             Main.hs
+  build-depends:       base >=4.13 && <4.14, containers, parsec, mtl, vector
+  hs-source-dirs:      ex10
+  default-language:    Haskell2010
+
+executable ex11
+  main-is:             Main.hs
+  build-depends:       base >=4.13 && <4.14, containers, parsec, mtl, vector
+  hs-source-dirs:      ex11
+  default-language:    Haskell2010
+
