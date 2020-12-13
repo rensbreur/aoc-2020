@@ -77,3 +77,9 @@ executable ex12
   hs-source-dirs:      ex12
   default-language:    Haskell2010
 
+executable ex13
+  main-is:             Main.hs
+  build-depends:       base >=4.13 && <4.14, parsec
+  hs-source-dirs:      ex13
+  default-language:    Haskell2010
+
